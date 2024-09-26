@@ -1,0 +1,22 @@
+configform.settings:
+  type: config_object
+  label: 'Site Configuration Settings'
+  mapping:
+    text_field_1:
+      type: string
+      label: 'Text Field 1'
+    text_field_2:
+      type: string
+      label: 'Text Field 2'
+    public_file_url:
+      type: string
+      label: 'Public File URL'
+    private_file_url:
+      type: string
+      label: 'Private File URL'
+    public_file:
+      type: string
+      label: 'Public File'
+    private_file:
+      type: string
+      label: 'Private File'

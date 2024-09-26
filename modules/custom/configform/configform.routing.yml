@@ -1,0 +1,9 @@
+configform.site_config_form:
+  path: '/admin/config/system/site-config'
+  defaults:
+    _form: '\Drupal\configform\Form\SiteConfigForm'
+    _title: 'Site Configuration Form'
+  requirements:
+    _permission: 'administer site configuration'
+  options:
+    _admin_route: TRUE

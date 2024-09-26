@@ -1,0 +1,11 @@
+configform.site_config_form_menu:
+  title: 'Site Configuration Form'
+  description: 'Configure site-specific settings and file uploads.'
+  route_name: configform.site_config_form
+  parent: system.admin_config_system
+  weight: 100
+  menu_name: admin
+  options:
+    attributes:
+      class:
+        - 'menu-item'

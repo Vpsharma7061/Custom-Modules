@@ -1,0 +1,8 @@
+name: 'Config Form Module'
+type: module
+description: 'A module that provides a configuration form with file uploads.'
+core_version_requirement: ^9 || ^10
+package: Custom
+dependencies:
+  - file
+configure: configform.form.site_config_form
