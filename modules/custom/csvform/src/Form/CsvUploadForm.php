@@ -24,33 +24,48 @@ class CsvUploadForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    // Checkbox to enable CSV upload.
+    
+    
+
+    // Heading of the Form
+    $form['heading'] = [
+      '#type' => 'markup',
+      '#markup' => '<h2>' . $this->t('Hello User! Check the Checkbox to Upload Your CSV file') . '</h2>',
+      '#prefix' => '<div class="csv-upload-heading">',
+      '#suffix' => '</div>',
+    ];
+
+
+// Checkbox to enable CSV upload.
     $form['enable_upload'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Enable CSV Upload'),
       '#description' => $this->t('Check to enable CSV file upload.'),
-      '#ajax' => [
-        'callback' => '::toggleCsvUpload',
-        'wrapper' => 'csv-file-wrapper',
-        'event' => 'change',
+    ];
+
+    // Container field for the CSV file upload.
+    $form['csv_container'] = [
+      '#type' => 'container',
+      '#attributes' => ['id' => 'csv-file-wrapper'],
+      '#states' => [
+        'visible' => [
+          ':input[name="enable_upload"]' => ['checked' => TRUE],
+        ],
       ],
     ];
 
-    // CSV File upload field, hidden by default.
-    $form['csv_file'] = [
+
+
+    // CSV File upload field.
+    $form['csv_container']['csv_file'] = [
       '#type' => 'managed_file',
       '#title' => $this->t('CSV File'),
       '#upload_validators' => [
         'file_validate_extensions' => ['csv'],
       ],
       '#upload_location' => 'public://sites/default/files/',
-      '#prefix' => '<div id="csv-file-wrapper">',
-      '#suffix' => '</div>',
-      '#states' => [
-        'visible' => [
-          ':input[name="enable_upload"]' => ['checked' => TRUE],
-        ],
-      ],
+      '#required' => TRUE, // Make it required if necessary.
+
     ];
 
     // Submit button.
@@ -63,40 +78,49 @@ class CsvUploadForm extends FormBase {
   }
 
   /**
-   * AJAX callback to toggle the visibility of the CSV file upload field.
+   * AJAX callback to toggle the visibility of the CSV container.
    */
   public function toggleCsvUpload(array &$form, FormStateInterface $form_state) {
-    return $form['csv_file'];
+    // This function returns the part of the form that should be updated via AJAX.
+    return $form['csv_container'];
   }
 
   /**
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    // Load the uploaded file.
-    $file = $form_state->getValue('csv_file');
-    if ($file) {
-      $file = \Drupal::entityTypeManager()->getStorage('file')->load($file[0]);
-      $file->setPermanent();
-      $file->save();
+    // Process the uploaded file if the checkbox is checked.
+    if ($form_state->getValue('enable_upload', FALSE)) {
+      $file = $form_state->getValue('csv_file');
 
-      // Define a batch for processing.
-      $batch = new BatchBuilder();
-      $batch->setTitle($this->t('Processing CSV...'))
-        ->setInitMessage($this->t('Starting CSV processing.'))
-        ->setProgressMessage($this->t('Processing CSV...'))
-        ->setErrorMessage($this->t('CSV processing encountered an error.'))
-        ->setFinishCallback([CsvBatchProcess::class, 'batchFinished']);
+      if ($file) {
+        $file = \Drupal::entityTypeManager()->getStorage('file')->load($file[0]);
+        $file->setPermanent();
+        $file->save();
+        
+        // Define a batch for processing.
+        $batch = new BatchBuilder();
+        $batch->setTitle($this->t('Processing CSV...'))
+          ->setInitMessage($this->t('Starting CSV processing.'))
+          ->setProgressMessage($this->t('Processing CSV...'))
+          ->setErrorMessage($this->t('CSV processing encountered an error.'))
+          ->setFinishCallback([CsvBatchProcess::class, 'batchFinished']);
 
-      // Add batch operation to process the CSV.
-      $batch->addOperation([CsvBatchProcess::class, 'batchProcess'], [$file->getFileUri()]);
+        // Add batch operation to process the CSV.
+        $batch->addOperation([CsvBatchProcess::class, 'batchProcess'], [$file->getFileUri()]);
 
-      // Set the batch.
-      batch_set($batch->toArray());
-
-      // Redirect after batch processing.
-      $form_state->setRedirectUrl(Url::fromRoute('csvform.csv_upload_form'));
+        // Set the batch.
+        batch_set($batch->toArray());
+        
+        // Display a message to confirm submission.
+        \Drupal::messenger()->addMessage($this->t('File uploaded successfully.'));
+      }
+    } else {
+      // Optionally handle when the checkbox is not checked.
+      \Drupal::messenger()->addMessage($this->t('CSV upload was not enabled.'));
     }
-  }
 
+    // Redirect after processing.
+    $form_state->setRedirectUrl(Url::fromRoute('csvform.csv_upload_form'));
+  }
 }
