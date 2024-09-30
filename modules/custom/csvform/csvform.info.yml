@@ -1,0 +1,8 @@
+name: 'CSV Importer'
+type: module
+description: 'A custom module to handle CSV file uploads and conditional form logic.'
+core_version_requirement: ^9 || ^10
+package: Custom
+dependencies:
+  - drupal:node
+version: 1.0

@@ -1,0 +1,11 @@
+csvform.csv_upload_form:
+  path: '/admin/csv-import'
+  defaults:
+    _form: '\Drupal\csvform\Form\CsvUploadForm'
+    _title: 'CSV Upload Form'
+  requirements:
+    _permission: 'administer site configuration'
+  options:
+    _admin_route: TRUE
+
+
