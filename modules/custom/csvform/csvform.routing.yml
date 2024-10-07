@@ -9,3 +9,12 @@ csvform.csv_upload_form:
     _admin_route: TRUE
 
 
+csvform.settings:
+  path: '/admin/config/csv-import-settings'
+  defaults:
+    _form: '\Drupal\csvform\Form\CsvImportSettingsForm'
+    _title: 'CSV Import Settings'
+  requirements:
+    _permission: 'administer site configuration'
+  options:
+    _admin_route: TRUE
