@@ -43,5 +43,4 @@ class CsvNodeCreationWorker extends QueueWorkerBase {
       ]);
     }
   }
-
 }

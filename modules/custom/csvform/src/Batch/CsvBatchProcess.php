@@ -41,7 +41,7 @@ class CsvBatchProcess {
         continue; // Skip this row if it's not valid.
       }
 
-      // Check if the node already exists based on the unique identifier (UUID).
+     
       $node_storage = \Drupal::entityTypeManager()->getStorage('node');
       $existing_nodes = $node_storage->loadByProperties([
         'field_name' => $row[0],
