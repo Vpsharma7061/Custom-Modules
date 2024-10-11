@@ -1,5 +1,6 @@
 <?php
 
+
 namespace Drupal\csvapi\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
@@ -7,6 +8,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Drupal\file\Entity\File;
 use Drupal\Core\File\FileSystemInterface;
+use Drupal\Core\File\FileUrlGenerator;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Class CSVAPIController.
@@ -14,6 +17,22 @@ use Drupal\Core\File\FileSystemInterface;
  * Handles CSV file uploads and processing.
  */
 class CSVAPIController extends ControllerBase {
+  
+  protected $fileSystem;
+  protected $fileUrlGenerator;
+
+  public function __construct(FileSystemInterface $file_system, FileUrlGenerator $file_url_generator) {
+    $this->fileSystem = $file_system;
+    $this->fileUrlGenerator = $file_url_generator;
+  }
+
+  // Static method for dependency injection.
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('file_system'),
+      $container->get('file_url_generator')
+    );
+  }
 
   /**
    * Handles file upload via the API.
@@ -23,11 +42,10 @@ class CSVAPIController extends ControllerBase {
 
     if ($uploaded_file && $uploaded_file->isValid()) {
       $directory = 'public://';
-      $file_system = \Drupal::service('file_system');
-      $file_system->prepareDirectory($directory, FileSystemInterface::CREATE_DIRECTORY);
+      $this->fileSystem->prepareDirectory($directory, FileSystemInterface::CREATE_DIRECTORY);
       $destination = $directory . $uploaded_file->getClientOriginalName();
       $file_content = file_get_contents($uploaded_file->getRealPath());
-      $file_system->saveData($file_content, $destination, FileSystemInterface::EXISTS_REPLACE);
+      $this->fileSystem->saveData($file_content, $destination, FileSystemInterface::EXISTS_REPLACE);
 
       $file = File::create([
         'uri' => $destination,
@@ -35,7 +53,7 @@ class CSVAPIController extends ControllerBase {
       ]);
       $file->save();
 
-      $file_url = \Drupal::service('file_url_generator')->generateAbsoluteString($file->getFileUri());
+      $file_url = $this->fileUrlGenerator->generateAbsoluteString($file->getFileUri());
 
       if ($file) {
         $response = [
@@ -47,6 +65,7 @@ class CSVAPIController extends ControllerBase {
     }
     return new JsonResponse(['error' => 'Invalid file upload.'], 400);
   }
+
 
 
 
