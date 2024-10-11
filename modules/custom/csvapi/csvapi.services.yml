@@ -1,0 +1,6 @@
+# services:
+#   csvapi.csv_api_queue_worker:
+#     class: Drupal\csvapi\Plugin\QueueWorker\CSVAPIQueueWorker
+#     arguments: ['@logger.factory']
+#     tags:
+#       - { name: queue_worker, queue_name: 'csvapi_queue_worker', label: 'CSV API Queue Worker', type: 'default' }

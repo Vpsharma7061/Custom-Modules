@@ -1,0 +1,17 @@
+csvapi.upload:
+  path: '/api/upload-csv'
+  defaults:
+    _controller: '\Drupal\csvapi\Controller\CSVAPIController::upload'
+    _title: 'Upload CSV'
+  requirements:
+    _permission: 'access content'
+
+csvapi.process:
+  path: '/api/process-csv'
+  defaults:
+    _controller: '\Drupal\csvapi\Controller\CSVAPIController::process'
+    _format: 'json'
+  methods: ['POST']
+  requirements:
+    _permission: 'access content'
+

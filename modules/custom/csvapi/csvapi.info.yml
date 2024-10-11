@@ -1,0 +1,12 @@
+name: 'CSV Api'
+type: module
+description: 'Provides an API for uploading and processing CSV files.'
+core_version_requirement: ^10 || ^9
+package: Custom
+dependencies:
+  - drupal:system
+  - drupal:system
+  - drupal:node
+  - drupal:file
+  - drupal:rest
+  - drupal:serialization
