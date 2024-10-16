@@ -15,3 +15,32 @@ csvapi.process:
   requirements:
     _permission: 'access content'
 
+csvapi.queue_items:
+  path: '/api/csv/queue'
+  defaults:
+    _controller: '\Drupal\csvapi\Controller\CSVAPIController::fetchQueueItems'
+    _title: 'Queue Items'
+  requirements:
+    _permission: 'access content' # Adjust this permission as needed
+
+csvapi.process_single_item:
+  path: '/api/csvapi/process-item'
+  defaults:
+    _controller: '\Drupal\csvapi\Controller\CSVAPIQueueController::processSingleItem'
+    _title: 'Process Queue Item'
+  methods: ['POST']
+  requirements:
+    _permission: 'access content'
+
+csvapi.process_multiple_items:
+  path: '/api/csvapi/process-multiple-items'
+  defaults:
+    _controller: '\Drupal\csvapi\Controller\CSVAPIQueueController::processMultipleItems'
+    _title: 'Process Multiple Queue Items'
+  requirements:
+    _permission: 'access content'
+  methods: ['POST']
+
+
+
+

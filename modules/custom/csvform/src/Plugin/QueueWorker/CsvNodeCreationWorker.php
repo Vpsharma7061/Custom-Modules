@@ -22,7 +22,7 @@ class CsvNodeCreationWorker extends QueueWorkerBase {
   public function processItem($data) {
     \Drupal::logger('csvform')->info('Processing data: @data', ['@data' => print_r($data, TRUE)]);
 
-    // Try to create the node.
+    
     try {
       $node = Node::create([
         'type' => 'csvform',
@@ -31,8 +31,8 @@ class CsvNodeCreationWorker extends QueueWorkerBase {
         'field_email' => $data['email'],
         'field_address' => $data['address'],
         'field_contact_no' => $data['contact_no'],
-        'status' => 1, // Set to 1 for published.
-        'uid' => 1, // Replace with a valid user ID or use a variable for dynamic assignment.
+        'status' => 1, 
+        'uid' => 1, 
       ]);
       $node->save();
       \Drupal::logger('csvform')->info('Node created: @title', ['@title' => $data['name']]);

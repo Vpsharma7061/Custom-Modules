@@ -21,56 +21,43 @@ class CSVAPIQueueWorker extends QueueWorkerBase {
    * Processes the queue item.
    *
    * @param mixed $item
-   *   The item to process, containing the file ID.
+   *   The item to process, which now contains the CSV row data.
    */
   public function processItem($item) {
-    $file = File::load($item['file_id']);
-
-    if ($file) {
-      $this->processCSV($file);
+    // Assuming $item is an associative array containing a 'data' key with the row data
+    if (isset($item['data'])) {
+      $this->createNodeFromCSVRow($item['data']);
     } else {
-      \Drupal::logger('csvapi')->error('Failed to load file with ID: @id', ['@id' => $item['file_id']]);
+      \Drupal::logger('csvapi')->error('Queue item does not contain data.');
     }
   }
 
   /**
-   * Processes the CSV file and creates nodes.
+   * Creates a node from a CSV row.
    *
-   * @param \Drupal\file\Entity\File $file
-   *   The file entity to process.
+   * @param array $row
+   *   The CSV row data.
    */
-  protected function processCSV(File $file) {
-    \Drupal::logger('csvapi')->info('Starting to process CSV file: @uri', ['@uri' => $file->getFileUri()]);
+  protected function createNodeFromCSVRow(array $row) {
+    // Ensure there are enough fields in the row
+    if (count($row) >= 4) {
+      $node = Node::create([
+        'type' => 'csvform',
+        'title' => $row[0], // Assuming title is the first column
+        'field_name' => $row[0],
+        'field_email' => $row[1],
+        'field_address' => $row[2],
+        'field_contact_no' => $row[3],
+        'status' => 1,
+        'uid' => 1, // You may want to set this to the currently logged-in user
+      ]);
+      $node->save();
 
-   
-    $data = fopen($file->getFileUri(), 'r');
-    if ($data === FALSE) {
-      \Drupal::logger('csvapi')->error('Could not open file @uri for reading.', ['@uri' => $file->getFileUri()]);
-      return;
+      \Drupal::logger('csvapi')->info('Node created: @title', ['@title' => $row[0]]);
+    } else {
+      \Drupal::logger('csvapi')->warning('Row skipped due to insufficient columns: @row', [
+        '@row' => implode(', ', $row),
+      ]);
     }
-
-    while (($row = fgetcsv($data)) !== FALSE) {
-      if (count($row) <= 4) {
-        $node = Node::create([
-          'type' => 'csvform',
-          'title' => $row[0],
-          'field_name' => $row[0],
-          'field_email' => $row[1],
-          'field_address' => $row[2],
-          'field_contact_no' => $row[3],
-          'status' => 1,
-          'uid' => 1,
-        ]);
-        $node->save();
-
-        \Drupal::logger('csvapi')->info('Node created: @title', ['@title' => $row[0]]);
-      } else {
-        \Drupal::logger('csvapi')->warning('Row skipped due to insufficient columns: @row', [
-          '@row' => implode(', ', $row),
-        ]);
-      }
-    }
-
-    fclose($data);
   }
 }
